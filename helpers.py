@@ -1,6 +1,7 @@
 import time
 from loguru import logger
 
+
 def timer(function):
     """
     This function takes a function as an argument and
