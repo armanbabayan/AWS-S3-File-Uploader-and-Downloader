@@ -5,6 +5,7 @@ import argparse
 import boto3
 import os
 
+from helpers import timer
 
 load_dotenv()
 aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
@@ -14,6 +15,7 @@ bucket_folder_images = os.getenv("BUCKET_FOLDER_IMAGES")
 bucket_folder_annotations = os.getenv("BUCKET_FOLDER_ANNOTATIONS")
 
 
+@timer
 def get_number_of_files(bucket_name: str, bucket_folder: str) -> tuple:
     """
     This function takes AWS bucket name and a folder name from that bucket
@@ -39,6 +41,7 @@ def get_number_of_files(bucket_name: str, bucket_folder: str) -> tuple:
     return count, file_names
 
 
+@timer
 def download_objects(object_names: list, bucket_name: str, bucket_folder: str, save_dir: str):
     """
     This function takes object list as an input, bucket folder dir and the save path
@@ -85,12 +88,12 @@ if __name__ == '__main__':
     logger.info("Start downloading files...")
     logger.info(f"Number of images to be downloaded: {len(image_names)}")
     logger.info(f"Number of annotations to be downloaded: {len(annotations)}")
-    download_objects(
-                     object_names=image_names,
-                     bucket_name=args.bucket_name,
-                     bucket_folder=args.bucket_folder_images,
-                     save_dir=args.save_dir_images
-                     )
+    # download_objects(
+    #                  object_names=image_names,
+    #                  bucket_name=args.bucket_name,
+    #                  bucket_folder=args.bucket_folder_images,
+    #                  save_dir=args.save_dir_images
+    #                  )
     download_objects(
                      object_names=annotations,
                      bucket_name=args.bucket_name,
