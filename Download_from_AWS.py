@@ -88,12 +88,12 @@ if __name__ == '__main__':
     logger.info("Start downloading files...")
     logger.info(f"Number of images to be downloaded: {len(image_names)}")
     logger.info(f"Number of annotations to be downloaded: {len(annotations)}")
-    # download_objects(
-    #                  object_names=image_names,
-    #                  bucket_name=args.bucket_name,
-    #                  bucket_folder=args.bucket_folder_images,
-    #                  save_dir=args.save_dir_images
-    #                  )
+    download_objects(
+                     object_names=image_names,
+                     bucket_name=args.bucket_name,
+                     bucket_folder=args.bucket_folder_images,
+                     save_dir=args.save_dir_images
+                     )
     download_objects(
                      object_names=annotations,
                      bucket_name=args.bucket_name,
