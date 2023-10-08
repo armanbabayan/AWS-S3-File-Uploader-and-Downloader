@@ -6,14 +6,11 @@ import argparse
 import boto3
 import os
 import glob
-from helpers import timer
 
 load_dotenv()
 aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
 aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
 bucket_name = os.getenv("BUCKET_NAME")
-bucket_folder_images = os.getenv("BUCKET_FOLDER_IMAGES")
-bucket_folder_annotations = os.getenv("BUCKET_FOLDER_ANNOTATIONS")
 
 s3 = boto3.client(
     "s3",
