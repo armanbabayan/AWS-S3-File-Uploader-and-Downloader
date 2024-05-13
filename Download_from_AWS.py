@@ -15,8 +15,12 @@ bucket_folder_images = os.getenv("BUCKET_FOLDER_IMAGES")
 bucket_folder_annotations = os.getenv("BUCKET_FOLDER_ANNOTATIONS")
 
 # initialize s3 client
-s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id,
-                      aws_secret_access_key=aws_secret_access_key)
+s3_client = boto3.client(
+    "s3",
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+)
+
 
 @timer
 def get_number_of_files(s3, bucket_name: str, bucket_folder: str) -> tuple:
@@ -30,22 +34,24 @@ def get_number_of_files(s3, bucket_name: str, bucket_folder: str) -> tuple:
     :return tuple: first element is number of files, second element is the names of that files
     """
 
-    paginator = s3.get_paginator('list_objects_v2')
+    paginator = s3.get_paginator("list_objects_v2")
     response_iterator = paginator.paginate(Bucket=bucket_name, Prefix=bucket_folder)
     file_names = []
     count = 0
     for response in tqdm(response_iterator):
-        if 'Contents' in response:
-            files = response['Contents']
+        if "Contents" in response:
+            files = response["Contents"]
             for file in files:
-                file_names.append(file['Key'].split("/")[-1])
+                file_names.append(file["Key"].split("/")[-1])
                 count += 1
     file_names = file_names[1::]
     return count, file_names
 
 
 @timer
-def download_objects(s3, object_names: list, bucket_name: str, bucket_folder: str, save_dir: str):
+def download_objects(
+    s3, object_names: list, bucket_name: str, bucket_folder: str, save_dir: str
+):
     """
     This function takes object list as an input, bucket folder dir and the save path
     and downloads files from give AWS bucket to the specific directory
@@ -58,33 +64,58 @@ def download_objects(s3, object_names: list, bucket_name: str, bucket_folder: st
     """
 
     for object_name in tqdm(object_names):
-        bucket_folder_path = '%s/%s' % (bucket_folder, object_name)
-        s3.download_file(bucket_name, bucket_folder_path,
-                         os.path.join(save_dir, object_name))
+        bucket_folder_path = "%s/%s" % (bucket_folder, object_name)
+        s3.download_file(
+            bucket_name, bucket_folder_path, os.path.join(save_dir, object_name)
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--bucket_name', type=str, default=bucket_name, help='AWS bucket name')
-    parser.add_argument('--bucket_folder_images', type=str, default=bucket_folder_images,
-                        help='Folder name of the images in the bucket')
-    parser.add_argument('--bucket_folder_annotations', type=str, default=bucket_folder_annotations,
-                        help='Folder name of the annotations in the bucket')
-    parser.add_argument('--save_dir_images', type=str, help='The directory path to save downloaded images.')
-    parser.add_argument('--save_dir_annot', type=str, help='The directory path to save downloaded annotations.')
-    parser.add_argument('--number_of_files', type=int, default=None,
-                        help='Number of files to be downloaded.')
+    parser.add_argument(
+        "--bucket_name", type=str, default=bucket_name, help="AWS bucket name"
+    )
+    parser.add_argument(
+        "--bucket_folder_images",
+        type=str,
+        default=bucket_folder_images,
+        help="Folder name of the images in the bucket",
+    )
+    parser.add_argument(
+        "--bucket_folder_annotations",
+        type=str,
+        default=bucket_folder_annotations,
+        help="Folder name of the annotations in the bucket",
+    )
+    parser.add_argument(
+        "--save_dir_images",
+        type=str,
+        help="The directory path to save downloaded images.",
+    )
+    parser.add_argument(
+        "--save_dir_annot",
+        type=str,
+        help="The directory path to save downloaded annotations.",
+    )
+    parser.add_argument(
+        "--number_of_files",
+        type=int,
+        default=None,
+        help="Number of files to be downloaded.",
+    )
 
     args = parser.parse_args()
 
-    image_count, image_names = get_number_of_files(s3=s3_client, bucket_name=args.bucket_name, bucket_folder=args.bucket_folder_images)
+    image_count, image_names = get_number_of_files(
+        s3=s3_client,
+        bucket_name=args.bucket_name,
+        bucket_folder=args.bucket_folder_images,
+    )
     logger.info(f"Number of files in the folder: {image_count}")
 
     if args.number_of_files is not None:
-        image_names = image_names[:int(args.number_of_files)]
-        print(type(int(args.number_of_files)))
-        print(f"len {len(image_names)}")
+        image_names = image_names[: int(args.number_of_files)]
         annotations = [name.replace(".png", ".txt") for name in image_names]
     else:
         annotations = [name.replace(".png", ".txt") for name in image_names]
@@ -92,18 +123,17 @@ if __name__ == '__main__':
     logger.info(f"Number of images to be downloaded: {len(image_names)}")
     logger.info(f"Number of annotations to be downloaded: {len(annotations)}")
     download_objects(
-                     s3=s3_client,
-                     object_names=image_names,
-                     bucket_name=args.bucket_name,
-                     bucket_folder=args.bucket_folder_images,
-                     save_dir=args.save_dir_images
-                     )
+        s3=s3_client,
+        object_names=image_names,
+        bucket_name=args.bucket_name,
+        bucket_folder=args.bucket_folder_images,
+        save_dir=args.save_dir_images,
+    )
     download_objects(
-                     s3=s3_client,
-                     object_names=annotations,
-                     bucket_name=args.bucket_name,
-                     bucket_folder=args.bucket_folder_annotations,
-                     save_dir=args.save_dir_annot
-                     )
+        s3=s3_client,
+        object_names=annotations,
+        bucket_name=args.bucket_name,
+        bucket_folder=args.bucket_folder_annotations,
+        save_dir=args.save_dir_annot,
+    )
     logger.success("Downloading finished successfully!")
-
