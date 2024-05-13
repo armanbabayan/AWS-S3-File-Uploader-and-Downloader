@@ -2,3 +2,5 @@
 .idea
 images
 labels
+.DS_Store
+__pycache__/
